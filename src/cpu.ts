@@ -1,6 +1,8 @@
+import { AlgoUtil } from "./util";
+
 let task: Task[] = [];
 
-class Task{
+export class Task{
     id: string;
     arrivalTime: number;
     cpuBurst: number;
@@ -41,21 +43,12 @@ class Task{
         Time Executed: ${this.timeExecuted}
         Time Shifted: ${this.shift}`;
         }
-    }
-
-class AlgoUtil {
-    getTotalBurst(taskList: Task[]): number {
-        return taskList.reduce((totalBurst, task) => totalBurst + task.cpuBurst, 0);
-    }
-
-    avg(list:number[]){
-         return (list.reduce((num,i)=> num += i,0))/list.length;
-    }
 
     removeTasks(){
-        task = [];
+        task = []
     }
-}
+    }
+
 
 class AlgoPrinter{
     private util: AlgoUtil 
@@ -63,4 +56,56 @@ class AlgoPrinter{
     constructor() {
         this.util = new AlgoUtil();
       }
+
 }
+
+export class Algorithm{
+    private util: AlgoUtil
+    constructor(){
+        this.util = new AlgoUtil();
+    }
+
+    fcfs(taskList: Task[]){
+        const n = "fcfs"
+        let counter = 0;
+        let queue:Task[] = [];
+        let gantString = "";
+        let currentTask:Task | null = null
+        let finishedTask: Task[] = []
+        taskList = this.util.sortList(taskList)
+        let copyTaskList = [...taskList];
+
+        while(finishedTask.length !== taskList.length && counter < 50){
+            if (copyTaskList.length){
+                [queue, copyTaskList] = this.util.addToQueue(copyTaskList,counter,queue)
+            }
+
+            if (queue.length > 0){
+                if(!currentTask)
+                    currentTask = this.util.taskExecute(queue.shift(),counter,n)
+            }
+
+            if (currentTask){
+                gantString += currentTask.id
+                currentTask.cpuBurstNeeded -= 1;
+                if (currentTask.cpuBurstNeeded === 0)
+                    [currentTask, finishedTask] = this.util.processFinishedTask(currentTask,finishedTask,counter)
+            }
+            else{
+                gantString += "-"
+            }
+            console.log(gantString,finishedTask)
+            counter += 1;
+        }
+
+        return [gantString, "finished"]
+    }
+
+    checkFirstInQueue(queue:Task[], counter:number): boolean {
+        if (queue.length > 0 && queue[0].arrivalTime <= counter) {
+          return true;
+        }
+        return false;
+      }
+}
+
