@@ -94,18 +94,46 @@ export class Algorithm{
             else{
                 gantString += "-"
             }
-            console.log(gantString,finishedTask)
             counter += 1;
         }
 
         return [gantString, "finished"]
     }
 
-    checkFirstInQueue(queue:Task[], counter:number): boolean {
-        if (queue.length > 0 && queue[0].arrivalTime <= counter) {
-          return true;
+    spf(taskList: Task[]){
+        const n = "spf"
+        let counter = 0;
+        let queue:Task[] = [];
+        let gantString = "";
+        let currentTask:Task | null = null
+        let finishedTask: Task[] = []
+        taskList = this.util.sortList(taskList)
+        let copyTaskList = [...taskList];
+
+        while(finishedTask.length !== taskList.length && counter < 50){
+            if (copyTaskList.length){
+                [queue, copyTaskList] = this.util.addToQueue(copyTaskList,counter,queue)
+            }
+
+            if (queue.length > 0){
+                queue.sort((a,b) => a.cpuBurst - b.cpuBurst)
+                if(!currentTask)
+                    currentTask = this.util.taskExecute(queue.shift(),counter,n)
+            }
+
+            if (currentTask){
+                gantString += currentTask.id
+                currentTask.cpuBurstNeeded -= 1;
+                if (currentTask.cpuBurstNeeded === 0)
+                    [currentTask, finishedTask] = this.util.processFinishedTask(currentTask,finishedTask,counter)
+            }
+            else{
+                gantString += "-"
+            }
+            counter += 1;
         }
-        return false;
-      }
+
+        return [gantString, "finished"]
+    }
 }
 
