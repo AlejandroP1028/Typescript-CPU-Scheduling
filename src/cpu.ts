@@ -135,5 +135,106 @@ export class Algorithm{
 
         return [gantString, "finished"]
     }
+
+    srtf(taskList: Task[]){
+        const n = "srtf"
+        let counter = 0;
+        let queue:Task[] = [];
+        let gantString = "";
+        let currentTask:Task | null = null
+        let finishedTask: Task[] = []
+        taskList = this.util.sortList(taskList)
+        let copyTaskList = [...taskList];
+
+        while(finishedTask.length !== taskList.length ){
+            if (copyTaskList.length){
+                [queue, copyTaskList] = this.util.addToQueue(copyTaskList,counter,queue)
+            }
+
+            if (queue.length > 0){
+                queue.sort((a,b) => a.cpuBurstNeeded - b.cpuBurstNeeded)
+                const shortest = queue[0]
+                if(!currentTask || shortest.cpuBurstNeeded < currentTask.cpuBurstNeeded){
+                    if(currentTask){
+                        //if there is a task currently executing then shift current task
+                        currentTask.shift.push(counter);
+                        queue.push(currentTask);
+                    }
+                    currentTask = this.util.taskExecute(queue.shift() as Task,counter,n)
+
+                }
+                    
+            }
+
+            if (currentTask){
+                gantString += currentTask.id
+                currentTask.cpuBurstNeeded -= 1;
+                if (currentTask.cpuBurstNeeded === 0){
+                    [currentTask, finishedTask] = this.util.processFinishedTask(currentTask,finishedTask,counter)
+                }
+                   
+            }
+            else{
+                gantString += "-"
+            }
+
+            console.log(`Queue: ${queue.map(t => t.id).join(", ")}`);
+            counter += 1;
+
+        }
+        
+        return [gantString, "finished"]
+    }
+
+    rr(taskList: Task[],timeSlice: number){
+        let currentSlice = timeSlice
+        const revertSlice = () => {currentSlice = timeSlice}
+        const n = "rr"
+        let counter = 0;
+        let queue:Task[] = [];
+        let gantString = "";
+        let currentTask:Task | null = null
+        let finishedTask: Task[] = []
+        taskList = this.util.sortList(taskList)
+        let copyTaskList = [...taskList];
+
+        while(finishedTask.length !== taskList.length ){
+            if (copyTaskList.length){
+                [queue, copyTaskList] = this.util.addToQueue(copyTaskList,counter,queue)
+            }
+
+            if (queue.length > 0){
+                if(!currentTask){
+                    currentTask = this.util.taskExecute(queue.shift(),counter,n)
+                    revertSlice()
+                }    
+            }
+            if(currentSlice === 0){
+                [queue, copyTaskList] = this.util.addToQueue(copyTaskList, counter+1, queue);
+                gantString += "|";
+                [currentTask,queue] = this.util.onSliceEnd(currentTask,counter,queue)
+                revertSlice()
+            }
+            else  if (currentTask){
+                gantString += currentTask.id
+                currentTask.cpuBurstNeeded -= 1;
+                currentSlice -= 1;
+                if (currentTask.cpuBurstNeeded === 0){
+                    [currentTask, finishedTask] = this.util.processFinishedTask(currentTask,finishedTask,counter)
+                    gantString += "|";
+                    revertSlice()
+                }
+            }
+            else{
+                gantString += "-"
+            }
+            console.log(currentSlice)
+            counter += 1;
+
+        }
+        
+        return [gantString, "finished"]
+
+    }
 }
 

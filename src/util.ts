@@ -40,20 +40,34 @@ export class AlgoUtil {
 
     // add time
     taskExecute(task: Task, counter: number, type:string): Task{
-        if(type === "fcfs"){
+        if(type === "fcfs" || type === "spf"){
             task.timeExecuted.push(counter)
             task.waitingTime = this.taskWaitingTime(counter,task.arrivalTime)
+        }else if(type === "srtf" || type === "rr"){
+            task.timeExecuted.push(counter);
+            if (task.timeExecuted.length > 1) {
+              const waitingTimeY = this.taskWaitingTime(task.timeExecuted[task.timeExecuted.length - 1], task.shift[task.shift.length - 1]) ;
+              task.waitingTime += waitingTimeY;
+            } else {
+              task.waitingTime = this.taskWaitingTime(counter, task.arrivalTime);
+            }
         }
-        
         return task
     }
 
     processFinishedTask(task: Task, finishedTasks: Task[], counter: number): [Task, Task[]]{
         const shifted = counter + 1
         task.shift.push(shifted);
-        task.turnaroundTime = this.taskTurnaroundTime(counter+1,shifted)
+        task.turnaroundTime = this.taskTurnaroundTime(shifted,task.arrivalTime)
         finishedTasks.push(task);
-
         return [null,finishedTasks]
     }
+
+    onSliceEnd(task: Task,counter: number,queue: Task[]): [null,Task[]]{
+        task.shift.push(counter + 1)
+        queue.push(task)
+        return [null,queue]
     }
+    }
+
+    
