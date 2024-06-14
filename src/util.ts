@@ -40,10 +40,10 @@ export class AlgoUtil {
 
     // add time
     taskExecute(task: Task, counter: number, type:string): Task{
-        if(type === "fcfs" || type === "spf"){
+        if(type === "nonpreemptive"){
             task.timeExecuted.push(counter)
             task.waitingTime = this.taskWaitingTime(counter,task.arrivalTime)
-        }else if(type === "srtf" || type === "rr"){
+        }else if(type === "preemptive"){
             task.timeExecuted.push(counter);
             if (task.timeExecuted.length > 1) {
               const waitingTimeY = this.taskWaitingTime(task.timeExecuted[task.timeExecuted.length - 1], task.shift[task.shift.length - 1]) ;

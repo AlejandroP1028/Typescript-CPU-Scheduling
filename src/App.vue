@@ -14,12 +14,12 @@ const algo = new Algorithm();
 
 // Test Case 1
 const taskSet1 = [
-  new Task("a", 0, 12),
-  new Task("b", 3, 5),
-  new Task("c", 2, 10)
+  new Task("a", 0, 12,2),
+  new Task("b", 3, 5,1),
+  new Task("c", 2, 10,1)
 ];
 
-console.log(algo.rr(taskSet1,3))
+console.log(algo.psp(taskSet1))
 
 export default defineComponent({
   name: 'App',

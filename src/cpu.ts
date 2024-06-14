@@ -4,6 +4,7 @@ let task: Task[] = [];
 
 export class Task{
     id: string;
+    priority: number;
     arrivalTime: number;
     cpuBurst: number;
     cpuBurstNeeded: number;
@@ -11,7 +12,7 @@ export class Task{
     turnaroundTime: number;
     timeExecuted: number[];
     shift: number[];
-    constructor(id: string, arrivalTime: number, cpuBurst: number){
+    constructor(id: string, arrivalTime: number, cpuBurst: number, priority?: number){
         if (id.length !== 1){
             throw new Error("Task ID must be a character");
         }
@@ -24,6 +25,7 @@ export class Task{
         this.cpuBurstNeeded = cpuBurst;
         this.waitingTime = 0;
         this.turnaroundTime = 0;
+        this.priority = priority;
         this.timeExecuted = []; // Time when executed can be 1 or many depending on the process
         this.shift = []; // Time shifted value can be 1 or more depending on the process
         task.push(this);
@@ -66,7 +68,7 @@ export class Algorithm{
     }
 
     fcfs(taskList: Task[]){
-        const n = "fcfs"
+        const n = "nonpreemptive"
         let counter = 0;
         let queue:Task[] = [];
         let gantString = "";
@@ -75,7 +77,7 @@ export class Algorithm{
         taskList = this.util.sortList(taskList)
         let copyTaskList = [...taskList];
 
-        while(finishedTask.length !== taskList.length && counter < 50){
+        while(finishedTask.length !== taskList.length){
             if (copyTaskList.length){
                 [queue, copyTaskList] = this.util.addToQueue(copyTaskList,counter,queue)
             }
@@ -101,7 +103,7 @@ export class Algorithm{
     }
 
     spf(taskList: Task[]){
-        const n = "spf"
+        const n = "nonpreemptive"
         let counter = 0;
         let queue:Task[] = [];
         let gantString = "";
@@ -110,7 +112,7 @@ export class Algorithm{
         taskList = this.util.sortList(taskList)
         let copyTaskList = [...taskList];
 
-        while(finishedTask.length !== taskList.length && counter < 50){
+        while(finishedTask.length !== taskList.length){
             if (copyTaskList.length){
                 [queue, copyTaskList] = this.util.addToQueue(copyTaskList,counter,queue)
             }
@@ -137,7 +139,7 @@ export class Algorithm{
     }
 
     srtf(taskList: Task[]){
-        const n = "srtf"
+        const n = "preemptive"
         let counter = 0;
         let queue:Task[] = [];
         let gantString = "";
@@ -159,6 +161,7 @@ export class Algorithm{
                         //if there is a task currently executing then shift current task
                         currentTask.shift.push(counter);
                         queue.push(currentTask);
+                        gantString += "|"
                     }
                     currentTask = this.util.taskExecute(queue.shift() as Task,counter,n)
 
@@ -189,7 +192,7 @@ export class Algorithm{
     rr(taskList: Task[],timeSlice: number){
         let currentSlice = timeSlice
         const revertSlice = () => {currentSlice = timeSlice}
-        const n = "rr"
+        const n = "preemptive"
         let counter = 0;
         let queue:Task[] = [];
         let gantString = "";
@@ -228,13 +231,100 @@ export class Algorithm{
             else{
                 gantString += "-"
             }
-            console.log(currentSlice)
+            counter += 1;
+        }
+        return [gantString, "finished"]
+
+    }
+
+    psnp(taskList: Task[]){
+        const n = "nonpreemptive"
+        let counter = 0;
+        let queue:Task[] = [];
+        let gantString = "";
+        let currentTask:Task | null = null
+        let finishedTask: Task[] = []
+        taskList = this.util.sortList(taskList)
+        let copyTaskList = [...taskList];
+
+        while(finishedTask.length !== taskList.length){
+            if (copyTaskList.length){
+                [queue, copyTaskList] = this.util.addToQueue(copyTaskList,counter,queue)
+            }
+
+            if (queue.length > 0){
+                //sort by priority
+                queue.sort((a,b) => a.priority - b.priority)
+                if(!currentTask)
+                    currentTask = this.util.taskExecute(queue.shift(),counter,n)
+            }
+
+            if (currentTask){
+                gantString += currentTask.id
+                currentTask.cpuBurstNeeded -= 1;
+                if (currentTask.cpuBurstNeeded === 0)
+                    [currentTask, finishedTask] = this.util.processFinishedTask(currentTask,finishedTask,counter)
+            }
+            else{
+                gantString += "-"
+            }
+            counter += 1;
+        }
+
+        return [gantString, "finished"]
+    }
+    
+    psp(taskList: Task[]){
+        const n = "preemptive"
+        let counter = 0;
+        let queue:Task[] = [];
+        let gantString = "";
+        let currentTask:Task | null = null
+        let finishedTask: Task[] = []
+        taskList = this.util.sortList(taskList)
+        let copyTaskList = [...taskList];
+
+        while(finishedTask.length !== taskList.length ){
+            if (copyTaskList.length){
+                [queue, copyTaskList] = this.util.addToQueue(copyTaskList,counter,queue)
+            }
+
+            if (queue.length > 0){
+                queue.sort((a,b) => a.priority - b.priority)
+                const key = queue[0]
+                if(!currentTask || key.priority < currentTask.priority){
+                    if(currentTask){
+                        //if there is a task currently executing then shift current task
+                        currentTask.shift.push(counter);
+                        gantString += "|"
+                        queue.push(currentTask);
+                    }
+                    currentTask = this.util.taskExecute(queue.shift() as Task,counter,n)
+
+                }
+                    
+            }
+
+            if (currentTask){
+                gantString += currentTask.id
+                currentTask.cpuBurstNeeded -= 1;
+                if (currentTask.cpuBurstNeeded === 0){
+                    gantString += "|";
+                    [currentTask, finishedTask] = this.util.processFinishedTask(currentTask,finishedTask,counter)
+                }
+                   
+            }
+            else{
+                gantString += "-"
+            }
+
+            console.log(`Queue: ${queue.map(t => t.id).join(", ")}`);
             counter += 1;
 
         }
         
         return [gantString, "finished"]
-
     }
+    
 }
 
