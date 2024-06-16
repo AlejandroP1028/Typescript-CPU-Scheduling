@@ -62,6 +62,9 @@ class AlgoPrinter{
 }
 
 export class Algorithm{
+    //spf and psnp are similar the only difference is queue sort after queue check
+    //same with srtf and psp the only difference is queue sort and what is prioritized
+    
     private util: AlgoUtil
     constructor(){
         this.util = new AlgoUtil();
