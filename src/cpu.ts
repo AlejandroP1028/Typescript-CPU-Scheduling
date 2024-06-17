@@ -1,6 +1,5 @@
 import { AlgoUtil } from "./util";
 
-let task: Task[] = [];
 
 export class Task{
     id: string;
@@ -16,9 +15,6 @@ export class Task{
         if (id.length !== 1){
             throw new Error("Task ID must be a character");
         }
-        if (this.checkID(id)){
-            throw new Error("ID is not unique");
-        }
         this.id = id;
         this.arrivalTime = arrivalTime;
         this.cpuBurst = cpuBurst;
@@ -28,12 +24,8 @@ export class Task{
         this.priority = priority;
         this.timeExecuted = []; // Time when executed can be 1 or many depending on the process
         this.shift = []; // Time shifted value can be 1 or more depending on the process
-        task.push(this);
     }
 
-    checkID(id:string):boolean{
-        return task.some((task) => task.id === id);
-    }
 
     toString(): string {
         return `ID: ${this.id}
@@ -46,9 +38,7 @@ export class Task{
         Time Shifted: ${this.shift}`;
         }
 
-    removeTasks(){
-        task = []
-    }
+
     }
 
 
@@ -184,7 +174,6 @@ export class Algorithm{
                 gantString += "-"
             }
 
-            console.log(`Queue: ${queue.map(t => t.id).join(", ")}`);
             counter += 1;
 
         }
@@ -321,7 +310,6 @@ export class Algorithm{
                 gantString += "-"
             }
 
-            console.log(`Queue: ${queue.map(t => t.id).join(", ")}`);
             counter += 1;
 
         }

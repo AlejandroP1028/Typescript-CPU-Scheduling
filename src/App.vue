@@ -55,7 +55,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import CustomSelect from './components/customSelect.vue';
-
+import { Task, Algorithm } from './cpu';
 
 export default defineComponent({
   name: 'App',
@@ -65,7 +65,7 @@ export default defineComponent({
   },
   data() {
     return {
-
+      ids: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""),
       selectedAlgorithm: '',
       arrivalTimes: '',
       cpuBurst: '',
@@ -83,59 +83,80 @@ export default defineComponent({
     };
   },
   methods: {
-    executeTask() {
-      switch (this.selectedAlgorithm) {
-        case 'fcfs':
-          console.log(`isnan: ${Number("").valueOf()}`)
-          console.log(this.isListsValid([this.arrivalTimes.split(" "),this.cpuBurst.split(" ")]))
-          break;
-        case 'spf':
+  executeTask() {
+    const algo = new Algorithm()
+    let tasks = [];
+    let arrivalTimes = this.arrivalTimes.split(" ");
+    let cpuBursts = this.cpuBurst.split(" ");
 
-          break;
-        case 'srtf':
-
-          break;
-        case 'rr':
-
-          break;
-        case 'psnp':
-
-          break;
-        case 'psp':
-
-          break;
-        default:
-
-          break;
-      }
-    },
-    isListsValid(list: [[]]): boolean{
-      let len = this.countNum(list[0]);
-
-      list.shift()
-      for (let li of list){
-
-        if(this.countNum(li) !== len){
-          return false
-        }
-      }
-      return true
-    },
-    countNum(list: string[]): number {
-
-      let count = 0;
-
-      list.forEach(item => {
-
-        if (Number(item) >= 0) {
-
-          count++;
-        }
+    const addTasks = () => {
+      arrivalTimes.forEach((time, i) => {
+        tasks.push([time, cpuBursts[i]]);
       });
 
+      tasks = tasks.map((item, index) => {
+        return new Task(this.ids[index], Number(item[0]), Number(item[1]));
+      });
 
-      return count;
+    };
+
+    switch (this.selectedAlgorithm) {
+      case 'fcfs':
+        if (this.isListsValid([arrivalTimes, cpuBursts])) {
+          addTasks();
+          console.log(algo.fcfs(tasks))
+          console.log(tasks)
+        } 
+        break;
+      case 'spf':
+      if (this.isListsValid([arrivalTimes, cpuBursts])) {
+          addTasks();
+          console.log(algo.spf(tasks))
+          console.log(tasks)
+        } 
+        break;
+      case 'srtf':
+      if (this.isListsValid([arrivalTimes, cpuBursts])) {
+          addTasks();
+          console.log(algo.srtf(tasks))
+          console.log(tasks)
+        } 
+        break;
+      case 'rr':
+        // Add code for RR
+        break;
+      case 'psnp':
+        // Add code for PSNP
+        break;
+      case 'psp':
+        // Add code for PSP
+        break;
+      default:
+        break;
     }
+  },
+
+  isListsValid(lists) {
+    let len = this.countNum(lists[0]);
+
+    for (let list of lists) {
+      if (this.countNum(list) !== len) {
+        return false;
+      }
+    }
+    return true;
+  },
+
+  countNum(list) {
+    let count = 0;
+    list.forEach(item => {
+      if (item.trim() !== "" && !isNaN(Number(item.trim()))) {
+        count++;
+      }
+    });
+    return count;
   }
+}
+
 });
 </script>
