@@ -239,6 +239,8 @@ export class Algorithm{
     }
 
     rr(taskList: Task[],timeSlice: number){
+        console.log(timeSlice)
+        let bol = false
         let currentSlice = timeSlice
         const revertSlice = () => {currentSlice = timeSlice}
         const n = "preemptive"
@@ -257,12 +259,16 @@ export class Algorithm{
 
             if (queue.length > 0){
                 if(!currentTask){
+                    if(gantString[gantString.length-1] === "-")
+                        gantString += "|"
                     currentTask = this.util.taskExecute(queue.shift(),counter,n)
                     revertSlice()
                 }    
             }
             if(currentSlice === 0){
-                [queue, copyTaskList] = this.util.addToQueue(copyTaskList, counter+1, queue);
+                bol = true
+                console.log(counter);
+                [queue, copyTaskList] = this.util.addToQueue(copyTaskList, counter, queue);
                 gantString += "|";
                 [currentTask,queue] = this.util.onSliceEnd(currentTask,counter,queue)
                 revertSlice()
@@ -280,7 +286,10 @@ export class Algorithm{
             else{
                 gantString += "-"
             }
-            counter += 1;
+            if (bol == false)
+                counter += 1;
+
+            bol = false
         }
         const info = taskList.map( (item: Task): TaskInfo=> {
             return {

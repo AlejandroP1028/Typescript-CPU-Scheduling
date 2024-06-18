@@ -29,7 +29,6 @@ export class AlgoUtil {
     addToQueue(taskList:Task[], counter:number, queue:Task[] ): [Task[], Task[]]{
         while (taskList.length > 0 && taskList[0].arrivalTime <= counter){
             const shifted = taskList.shift()
-            
             if (shifted){
                 queue.push(shifted);
             }
@@ -64,7 +63,7 @@ export class AlgoUtil {
     }
 
     onSliceEnd(task: Task,counter: number,queue: Task[]): [null,Task[]]{
-        task.shift.push(counter + 1)
+        task.shift.push(counter)
         queue.push(task)
         return [null,queue]
     }
