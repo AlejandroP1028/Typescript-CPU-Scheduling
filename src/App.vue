@@ -201,7 +201,6 @@ export default defineComponent({
       case 'rr':
         if (this.isListsValid([arrivalTimes, cpuBursts]) && this.timeQuantum) {
           addTasks();
-          console.log(this.timeQuantum)
           info = algo.rr(tasks,this.timeQuantum)
         } 
         break;
@@ -220,7 +219,7 @@ export default defineComponent({
       default:
         break;
     }
-
+    if (info){
     this.taskExecuted = true;
     
     gant = info[0].split("|")
@@ -256,6 +255,9 @@ export default defineComponent({
 
     console.log(this.gantChart)
     console.log(tasks)
+
+    }
+    
   },
 
   isListsValid(lists) {
