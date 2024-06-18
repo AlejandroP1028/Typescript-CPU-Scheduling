@@ -45,7 +45,30 @@
         </button>
       </div>
       <div v-if="taskExecuted" class="flex flex-col w-3/4 h-full shadow-lg border-2 border-gray-300 rounded-lg p-4">
-        <!-- Result display goes here -->
+        <div class="h-1/2 w-full bg-blue-500">
+          a
+        </div>
+        <div class="h-1/2 w-full bg-red-500">
+          <table class="border p-4 w-full">
+            <th>
+              <td>
+                Task
+              </td>
+              <td>
+                Arrival Time
+              </td>
+              <td>
+                CPU Burst
+              </td>
+              <td>
+                Waiting Time
+              </td>
+              <td>
+                Turnaround Time
+              </td>
+            </th>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -55,7 +78,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import CustomSelect from './components/customSelect.vue';
-import { Task, Algorithm } from './cpu';
+import { Task, Algorithm, TaskInfo } from './cpu';
 
 export default defineComponent({
   name: 'App',
@@ -65,6 +88,7 @@ export default defineComponent({
   },
   data() {
     return {
+      tasksInfo: '',
       ids: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""),
       selectedAlgorithm: '',
       arrivalTimes: '',
@@ -88,6 +112,7 @@ export default defineComponent({
     let tasks = [];
     let arrivalTimes = this.arrivalTimes.split(" ");
     let cpuBursts = this.cpuBurst.split(" ");
+    let info: (string | TaskInfo[])[] = null
 
     const addTasks = () => {
       arrivalTimes.forEach((time, i) => {
@@ -103,23 +128,27 @@ export default defineComponent({
     switch (this.selectedAlgorithm) {
       case 'fcfs':
         if (this.isListsValid([arrivalTimes, cpuBursts])) {
+          this.taskExecuted = true;
           addTasks();
-          console.log(algo.fcfs(tasks))
-          console.log(tasks)
+          info = algo.fcfs(tasks)
+          this.tasksInfo = info[1]
+          console.log(this.tasksInfo)
+          
+
+
         } 
         break;
       case 'spf':
       if (this.isListsValid([arrivalTimes, cpuBursts])) {
           addTasks();
           console.log(algo.spf(tasks))
-          console.log(tasks)
+
         } 
         break;
       case 'srtf':
       if (this.isListsValid([arrivalTimes, cpuBursts])) {
           addTasks();
           console.log(algo.srtf(tasks))
-          console.log(tasks)
         } 
         break;
       case 'rr':

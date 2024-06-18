@@ -1,6 +1,10 @@
 import { AlgoUtil } from "./util";
 
-
+export type TaskInfo = {
+    id: string,
+    wt: number,
+    tt: number
+}
 export class Task{
     id: string;
     priority: number;
@@ -76,15 +80,24 @@ export class Algorithm{
             }
 
             if (queue.length > 0){
-                if(!currentTask)
+                if(!currentTask){
+                    if (gantString[gantString.length - 1] === "-"){
+                        gantString += "|"
+                    }
                     currentTask = this.util.taskExecute(queue.shift(),counter,n)
+
+                }
+                    
             }
 
             if (currentTask){
                 gantString += currentTask.id
                 currentTask.cpuBurstNeeded -= 1;
-                if (currentTask.cpuBurstNeeded === 0)
+                if (currentTask.cpuBurstNeeded === 0){
+                    gantString += "|";
                     [currentTask, finishedTask] = this.util.processFinishedTask(currentTask,finishedTask,counter)
+                }
+                    
             }
             else{
                 gantString += "-"
@@ -92,7 +105,17 @@ export class Algorithm{
             counter += 1;
         }
 
-        return [gantString, "finished"]
+        const info = taskList.map( (item: Task): TaskInfo=> {
+            return {
+                id: item.id,
+                wt: item.waitingTime,
+                tt: item.turnaroundTime
+            }
+        }
+        )
+        
+
+        return [gantString, info]
     }
 
     spf(taskList: Task[]){
@@ -112,15 +135,22 @@ export class Algorithm{
 
             if (queue.length > 0){
                 queue.sort((a,b) => a.cpuBurst - b.cpuBurst)
-                if(!currentTask)
+                if(!currentTask){
+                    if (gantString[gantString.length - 1] === "-"){
+                        gantString += "|"
+                    }
                     currentTask = this.util.taskExecute(queue.shift(),counter,n)
+                }
             }
 
             if (currentTask){
                 gantString += currentTask.id
                 currentTask.cpuBurstNeeded -= 1;
-                if (currentTask.cpuBurstNeeded === 0)
+                if (currentTask.cpuBurstNeeded === 0){
+                    gantString += "|";
                     [currentTask, finishedTask] = this.util.processFinishedTask(currentTask,finishedTask,counter)
+                }
+
             }
             else{
                 gantString += "-"
@@ -128,7 +158,15 @@ export class Algorithm{
             counter += 1;
         }
 
-        return [gantString, "finished"]
+        const info = taskList.map( (item: Task): TaskInfo=> {
+            return {
+                id: item.id,
+                wt: item.waitingTime,
+                tt: item.turnaroundTime
+            }
+        }
+        )
+        return [gantString, info]
     }
 
     srtf(taskList: Task[]){
@@ -150,6 +188,9 @@ export class Algorithm{
                 queue.sort((a,b) => a.cpuBurstNeeded - b.cpuBurstNeeded)
                 const shortest = queue[0]
                 if(!currentTask || shortest.cpuBurstNeeded < currentTask.cpuBurstNeeded){
+                    if (gantString[gantString.length - 1] === "-"){
+                        gantString += "|"
+                    }
                     if(currentTask){
                         //if there is a task currently executing then shift current task
                         currentTask.shift.push(counter);
@@ -166,6 +207,7 @@ export class Algorithm{
                 gantString += currentTask.id
                 currentTask.cpuBurstNeeded -= 1;
                 if (currentTask.cpuBurstNeeded === 0){
+                    gantString += "|";
                     [currentTask, finishedTask] = this.util.processFinishedTask(currentTask,finishedTask,counter)
                 }
                    
@@ -177,8 +219,15 @@ export class Algorithm{
             counter += 1;
 
         }
-        
-        return [gantString, "finished"]
+        const info = taskList.map( (item: Task): TaskInfo=> {
+            return {
+                id: item.id,
+                wt: item.waitingTime,
+                tt: item.turnaroundTime
+            }
+        }
+        )
+        return [gantString, info]
     }
 
     rr(taskList: Task[],timeSlice: number){
@@ -225,7 +274,15 @@ export class Algorithm{
             }
             counter += 1;
         }
-        return [gantString, "finished"]
+        const info = taskList.map( (item: Task): TaskInfo=> {
+            return {
+                id: item.id,
+                wt: item.waitingTime,
+                tt: item.turnaroundTime
+            }
+        }
+        )
+        return [gantString, info]
 
     }
 
@@ -247,23 +304,41 @@ export class Algorithm{
             if (queue.length > 0){
                 //sort by priority
                 queue.sort((a,b) => a.priority - b.priority)
-                if(!currentTask)
+                if(!currentTask){
+                    if (gantString[gantString.length - 1] === "-"){
+                        gantString += "|"
+                    }
                     currentTask = this.util.taskExecute(queue.shift(),counter,n)
+                }
+                    
             }
 
             if (currentTask){
                 gantString += currentTask.id
                 currentTask.cpuBurstNeeded -= 1;
-                if (currentTask.cpuBurstNeeded === 0)
-                    [currentTask, finishedTask] = this.util.processFinishedTask(currentTask,finishedTask,counter)
+                if (currentTask.cpuBurstNeeded === 0){
+                        [currentTask, finishedTask] = this.util.processFinishedTask(currentTask,finishedTask,counter)
+                        gantString += "|"
+                    
+                }
+                    
             }
             else{
                 gantString += "-"
             }
             counter += 1;
         }
+        
 
-        return [gantString, "finished"]
+        const info = taskList.map( (item: Task): TaskInfo=> {
+            return {
+                id: item.id,
+                wt: item.waitingTime,
+                tt: item.turnaroundTime
+            }
+        }
+        )
+        return [gantString, info]
     }
     
     psp(taskList: Task[]){
@@ -285,6 +360,9 @@ export class Algorithm{
                 queue.sort((a,b) => a.priority - b.priority)
                 const key = queue[0]
                 if(!currentTask || key.priority < currentTask.priority){
+                    if (gantString[gantString.length - 1] === "-"){
+                        gantString += "|"
+                    }
                     if(currentTask){
                         //if there is a task currently executing then shift current task
                         currentTask.shift.push(counter);
@@ -313,8 +391,16 @@ export class Algorithm{
             counter += 1;
 
         }
+        const info = taskList.map( (item: Task): TaskInfo=> {
+            return {
+                id: item.id,
+                wt: item.waitingTime,
+                tt: item.turnaroundTime
+            }
+        }
+        )
         
-        return [gantString, "finished"]
+        return [gantString, info]
     }
     
 }
