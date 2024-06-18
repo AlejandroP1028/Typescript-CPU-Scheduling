@@ -44,30 +44,44 @@
           EXECUTE
         </button>
       </div>
-      <div v-if="taskExecuted" class="flex flex-col w-3/4 h-full shadow-lg border-2 border-gray-300 rounded-lg p-4">
+      <div v-if="taskExecuted" class="flex flex-col w-3/4 h-fit shadow-lg border-2 border-gray-300 rounded-lg p-4">
         <div class="h-1/2 w-full bg-blue-500">
           a
         </div>
-        <div class="h-1/2 w-full bg-red-500">
-          <table class="border p-4 w-full">
-            <th>
-              <td>
-                Task
-              </td>
-              <td>
-                Arrival Time
-              </td>
-              <td>
-                CPU Burst
-              </td>
-              <td>
-                Waiting Time
-              </td>
-              <td>
-                Turnaround Time
-              </td>
-            </th>
-          </table>
+        <div class="h-1/2 w-full mt-12">
+          <table class="border border-collapse w-full table-auto">
+  <thead>
+    <tr class="border border-gray-400 bg-gray-200 divide-x divide-gray-400 text-gray-600 text-left">
+      <th class="p-2">Task</th>
+      <th class="p-2">Arrival Time</th>
+      <th class="p-2">CPU Burst</th>
+      <th class="p-2">Waiting Time</th>
+      <th class="p-2">Turnaround Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr v-for="task in tasksInfo" :key="task.id" class="p-4 border border-gray-400 text-gray-700 bg-gray-100 divide-x divide-gray-400 text-left">
+      <td class="p-2">Task {{ task.id }}</td>
+      <td class="p-2">{{ task.at }}</td>
+      <td class="p-2">{{ task.cb }}</td>
+      <td class="p-2">{{ task.wt }} m/s</td>
+      <td class="p-2">{{ task.tt }} m/s</td>
+    </tr>
+    <tr class="p-4 border border-gray-400 text-gray-700 bg-gray-100 divide-x divide-gray-400 text-left">
+      <td colspan="3" class="p-2 text-right mr-2">
+        Average:
+      </td>
+      <td class="p-2">
+        {{ average.wt }} m/s
+      </td>
+      <td class="p-2">
+        {{ average.tt }} m/s
+</td>
+    </tr>
+  </tbody>
+</table>
+
+
         </div>
       </div>
     </div>
@@ -88,7 +102,8 @@ export default defineComponent({
   },
   data() {
     return {
-      tasksInfo: '',
+      tasksInfo: null,
+      average: null,
       ids: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""),
       selectedAlgorithm: '',
       arrivalTimes: '',
@@ -110,8 +125,11 @@ export default defineComponent({
   executeTask() {
     const algo = new Algorithm()
     let tasks = [];
+    let wtC = 0;
+    let ttC = 0;
     let arrivalTimes = this.arrivalTimes.split(" ");
     let cpuBursts = this.cpuBurst.split(" ");
+    let shift = new Set([0])
     let info: (string | TaskInfo[])[] = null
 
     const addTasks = () => {
@@ -132,8 +150,32 @@ export default defineComponent({
           addTasks();
           info = algo.fcfs(tasks)
           this.tasksInfo = info[1]
-          console.log(this.tasksInfo)
+
+          this.tasksInfo.forEach( (item:TaskInfo) => {
+            wtC += item.wt
+            ttC += item.tt
+          })
+
+
+          tasks.forEach( (item:Task) => {
+            item.shift.forEach( (item:number) => {
+              shift.add(item)
+            })
+            item.timeExecuted.forEach( (item:number) => {
+              shift.add(item)
+            })
+          })
+
+
+
+          shift = new Set([...shift].sort((a:number, b:number) => a - b));
+
+          this.average = {
+            wt: (wtC / this.tasksInfo.length).toFixed(3),
+            tt: (ttC / this.tasksInfo.length).toFixed(3)
+          }
           
+
 
 
         } 

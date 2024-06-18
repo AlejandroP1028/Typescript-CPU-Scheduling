@@ -2,6 +2,8 @@ import { AlgoUtil } from "./util";
 
 export type TaskInfo = {
     id: string,
+    at: number,
+    cb: number,
     wt: number,
     tt: number
 }
@@ -108,6 +110,8 @@ export class Algorithm{
         const info = taskList.map( (item: Task): TaskInfo=> {
             return {
                 id: item.id,
+                at: item.arrivalTime,
+                cb: item.cpuBurst,
                 wt: item.waitingTime,
                 tt: item.turnaroundTime
             }
@@ -161,6 +165,8 @@ export class Algorithm{
         const info = taskList.map( (item: Task): TaskInfo=> {
             return {
                 id: item.id,
+                at: item.arrivalTime,
+                cb: item.cpuBurst,
                 wt: item.waitingTime,
                 tt: item.turnaroundTime
             }
@@ -222,6 +228,8 @@ export class Algorithm{
         const info = taskList.map( (item: Task): TaskInfo=> {
             return {
                 id: item.id,
+                at: item.arrivalTime,
+                cb: item.cpuBurst,
                 wt: item.waitingTime,
                 tt: item.turnaroundTime
             }
@@ -277,6 +285,8 @@ export class Algorithm{
         const info = taskList.map( (item: Task): TaskInfo=> {
             return {
                 id: item.id,
+                at: item.arrivalTime,
+                cb: item.cpuBurst,
                 wt: item.waitingTime,
                 tt: item.turnaroundTime
             }
@@ -333,6 +343,8 @@ export class Algorithm{
         const info = taskList.map( (item: Task): TaskInfo=> {
             return {
                 id: item.id,
+                at: item.arrivalTime,
+                cb: item.cpuBurst,
                 wt: item.waitingTime,
                 tt: item.turnaroundTime
             }
@@ -394,6 +406,8 @@ export class Algorithm{
         const info = taskList.map( (item: Task): TaskInfo=> {
             return {
                 id: item.id,
+                at: item.arrivalTime,
+                cb: item.cpuBurst,
                 wt: item.waitingTime,
                 tt: item.turnaroundTime
             }
