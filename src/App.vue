@@ -1,74 +1,57 @@
 <template>
   <div class="w-full h-screen flex flex-col space-y-8 items-center bg-slate-50 font-sans">
-    <div class="flex flex-row w-4/5 space-x-6 h-4/8 mt-4">
-      <div class="flex flex-col space-y-4 h-fit w-1/4 rounded-lg border-2 border-gray-300 shadow-lg p-4">
-        <h1 class="font-bold text-4xl text-gray-900 mb-2">
-          Input
-        </h1>
+    <div class="flex lg:flex-row lg:w-4/5 lg:space-x-6 lg:space-y-0 mt-4 h-auto w-4/5 flex-col space-x-0 space-y-6">
+      <div class="flex flex-col space-y-4 h-fit lg:w-1/4 w-full rounded-lg border-2 border-gray-300 shadow-lg p-4">
+        <h1 class="font-bold text-4xl text-gray-900 mb-2">Input</h1>
         <div>
-          <label for="algorithm" class="font-medium text-xl">
-            Algorithm
-          </label>
+          <label for="algorithm" class="font-medium text-xl">Algorithm</label>
           <CustomSelect v-model="selectedAlgorithm" :options="algorithmOptions" />
         </div>
-
+        
         <div v-if="selectedAlgorithm">
-          <label for="arrivalTimes" class="font-medium text-lg">
-            Arrival Times
-          </label>
+          <label for="arrivalTimes" class="font-medium text-lg">Arrival Times</label>
           <input type="text" id="arrivalTimes" v-model="arrivalTimes" class="block w-full p-2.5 mt-2 rounded-lg text-gray-600 border-2 bg-gray-100">
         </div>
 
         <div v-if="selectedAlgorithm">
-          <label for="cpuBurst" class="font-medium text-lg">
-            CPU Burst
-          </label>
+          <label for="cpuBurst" class="font-medium text-lg">CPU Burst</label>
           <input type="text" id="cpuBurst" v-model="cpuBurst" class="block w-full p-2.5 mt-2 text-gray-600 rounded-lg border-2 bg-gray-100">
         </div>
 
         <div v-if="['psnp', 'psp'].includes(selectedAlgorithm)">
-          <label for="priority" class="font-medium text-lg">
-            Priority
-          </label>
+          <label for="priority" class="font-medium text-lg">Priority</label>
           <input type="text" id="priority" v-model="priority" class="block w-full p-2.5 mt-2 rounded-lg text-gray-600 border-2 bg-gray-100">
         </div>
 
         <div v-if="selectedAlgorithm === 'rr'">
-          <label for="timeQuantum" class="font-medium text-lg">
-            Time Quantum
-          </label>
+          <label for="timeQuantum" class="font-medium text-lg">Time Quantum</label>
           <input type="text" id="timeQuantum" v-model="timeQuantum" class="block w-full p-2.5 mt-2 text-gray-600 rounded-lg border-2 bg-gray-100">
         </div>
 
-        <button v-if="selectedAlgorithm" @click="executeTask" type="button" class="bg-blue-500 font-bold w-fit self-center py-2 px-4 text-lg rounded-lg text-gray-50 hover:bg-blue-600">
-          EXECUTE
-        </button>
+        <button v-if="selectedAlgorithm" @click="executeTask" type="button" class="bg-blue-500 font-bold w-fit self-center py-2 px-4 text-lg rounded-lg text-gray-50 hover:bg-blue-600">EXECUTE</button>
       </div>
-      <div class="flex flex-col w-3/4 h-fit shadow-lg border-2 border-gray-300 rounded-lg p-4">
+
+      <div class="flex flex-col lg:w-3/4 w-full h-fit shadow-lg border-2 border-gray-300 rounded-lg p-4 mb-12">
         <div v-if="taskExecuted">
-          <div class="h-1/2 w-full flex flex-col">
-          <h1 class="font-bold text-4xl text-gray-900 mb-2">
-            Output
-          </h1>
-          <div class="flex flex-col items-center">
-            <h1 class="font-bold text-xl text-gray-700 mb-2">
-              Gantt Cart
-            </h1>
-            <div class="flex flex-row">
-              <div v-for="(id,index) in gantChart.id" :key="id" class="w-8 py-1 text-lg font-medium text-center" :class=" index % 2 === 0 ? 'bg-gray-200' : 'bg-gray-300'  ">
-              {{id}}
-              </div>
-            </div>  
-            <div class="flex flex-row ">
-              <div v-for="shift in gantChart.shifts" :key="shift" class="w-8 text-sm font-medium text-center text-gray-400">
-              {{shift}}
+          <div class="w-full flex flex-col">
+            <h1 class="font-bold text-4xl text-gray-900 mb-2">Output</h1>
+            <div class="flex flex-col items-center">
+              <h1 class="font-bold text-xl text-gray-700 mb-2">Gantt Chart</h1>
+              <div class="flex flex-row overflow-x-auto">
+                <div v-for="(id, index) in gantChart.id" :key="id" class="w-8 py-1 text-lg font-medium text-center" :class=" index % 2 === 0 ? 'bg-gray-200' : 'bg-gray-300' ">
+                  {{ id }}
+                </div>
+              </div>  
+              <div class="flex flex-row overflow-x-auto">
+                <div v-for="shift in gantChart.shifts" :key="shift" class="w-8 text-sm font-medium text-center text-gray-400">
+                  {{ shift }}
+                </div>
               </div>
             </div>
-            
           </div>
-        </div>
-        <div class="h-1/2 w-full mt-12">
-          <table class="border border-collapse w-full table-auto">
+
+          <div class="w-full mt-6 overflow-x-auto">
+            <table class="border border-collapse w-full table-auto">
               <thead>
                 <tr class="border border-gray-400 bg-gray-200 divide-x divide-gray-400 text-gray-600 text-left">
                   <th class="p-2">Task</th>
@@ -87,34 +70,22 @@
                   <td class="p-2">{{ task.tt }} m/s</td>
                 </tr>
                 <tr class="p-4 border border-gray-400 text-gray-700 bg-gray-100 divide-x divide-gray-400 text-left">
-                  <td colspan="3" class="p-2 text-right mr-2">
-                    Average:
-                  </td>
-                  <td class="p-2">
-                    {{ average.wt }} m/s
-                  </td>
-                  <td class="p-2">
-                    {{ average.tt }} m/s
-                   </td>
+                  <td colspan="3" class="p-2 text-right mr-2">Average:</td>
+                  <td class="p-2">{{ average.wt }} m/s</td>
+                  <td class="p-2">{{ average.tt }} m/s</td>
                 </tr>
               </tbody>
-        </table>
+            </table>
+          </div>
         </div>
-        </div>
+
         <div v-else>
-
-            <h1 class="font-bold text-4xl text-gray-900 mb-2">
-            Output
-            </h1>
-            <h1 class="text-gray-600">
-              Algorithm output will be shown here
-            </h1>
-
-          
+          <h1 class="font-bold text-4xl text-gray-900 mb-2">Output</h1>
+          <h1 class="text-gray-600">Algorithm output will be shown here</h1>
         </div>
       </div>
+      <br>
     </div>
-
   </div>
 </template>
 
@@ -184,6 +155,16 @@ export default defineComponent({
         if (this.isListsValid([arrivalTimes, cpuBursts])) {
           addTasks();
           info = algo.fcfs(tasks)
+
+          //turn algorithm steps into an array to incrementally do by index
+          let steps = info[2]
+                      .split("|").filter((subItem) => subItem.trim() !== "")
+                      .map((item) => item.split("-")
+                                          .filter((subItem) => subItem.trim() !== ""));
+
+
+          console.log(steps)
+
         } 
         break;
       case 'spf':

@@ -26,19 +26,21 @@ export class AlgoUtil {
         return taskList.sort((a, b) => a.arrivalTime - b.arrivalTime);
     }
 
-    addToQueue(taskList:Task[], counter:number, queue:Task[] ): [Task[], Task[]]{
+    addToQueue(taskList:Task[], counter:number, queue:Task[],algorithmSteps:string ): [Task[], Task[],string]{
         while (taskList.length > 0 && taskList[0].arrivalTime <= counter){
             const shifted = taskList.shift()
             if (shifted){
                 queue.push(shifted);
+                algorithmSteps += `${shifted.id}>~-`
             }
 
         }
-        return [queue, taskList]
+        return [queue, taskList,algorithmSteps]
     }
 
     // add time
-    taskExecute(task: Task, counter: number, type:string): Task{
+    taskExecute(task: Task, counter: number, type:string, as: string): [Task,string]{
+        as += `${task.id}>*-`
         if(type === "nonpreemptive"){
             task.timeExecuted.push(counter)
             task.waitingTime = this.taskWaitingTime(counter,task.arrivalTime)
@@ -51,21 +53,23 @@ export class AlgoUtil {
               task.waitingTime = this.taskWaitingTime(counter, task.arrivalTime);
             }
         }
-        return task
+        return [task,as]
     }
 
-    processFinishedTask(task: Task, finishedTasks: Task[], counter: number): [Task, Task[]]{
+    processFinishedTask(task: Task, finishedTasks: Task[], counter: number, as: string): [Task, Task[],string]{
+        as += `${task.id}<*-${task.id}>_-`
         const shifted = counter + 1
         task.shift.push(shifted);
         task.turnaroundTime = this.taskTurnaroundTime(shifted,task.arrivalTime)
         finishedTasks.push(task);
-        return [null,finishedTasks]
+        return [null,finishedTasks,as]
     }
 
-    onSliceEnd(task: Task,counter: number,queue: Task[]): [null,Task[]]{
+    onSliceEnd(task: Task,counter: number,queue: Task[],as: string): [null,Task[],string]{
+        as += `${task.id}<*-${task.id}>~-`
         task.shift.push(counter)
         queue.push(task)
-        return [null,queue]
+        return [null,queue,as]
     }
     }
 

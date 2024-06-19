@@ -5,7 +5,7 @@ export type TaskInfo = {
     at: number,
     cb: number,
     wt: number,
-    tt: number
+    tt: number,
 }
 export class Task{
     id: string;
@@ -67,6 +67,7 @@ export class Algorithm{
     }
 
     fcfs(taskList: Task[]){
+        let algorithmSteps = ""
         const n = "nonpreemptive"
         let counter = 0;
         let queue:Task[] = [];
@@ -78,7 +79,7 @@ export class Algorithm{
 
         while(finishedTask.length !== taskList.length){
             if (copyTaskList.length){
-                [queue, copyTaskList] = this.util.addToQueue(copyTaskList,counter,queue)
+                [queue, copyTaskList,algorithmSteps] = this.util.addToQueue(copyTaskList,counter,queue,algorithmSteps)
             }
 
             if (queue.length > 0){
@@ -86,25 +87,27 @@ export class Algorithm{
                     if (gantString[gantString.length - 1] === "-"){
                         gantString += "|"
                     }
-                    currentTask = this.util.taskExecute(queue.shift(),counter,n)
-
+                    [currentTask,algorithmSteps] = this.util.taskExecute(queue.shift(),counter,n,algorithmSteps)
                 }
                     
             }
 
             if (currentTask){
+                algorithmSteps += `${currentTask.id}^-`
                 gantString += currentTask.id
                 currentTask.cpuBurstNeeded -= 1;
                 if (currentTask.cpuBurstNeeded === 0){
                     gantString += "|";
-                    [currentTask, finishedTask] = this.util.processFinishedTask(currentTask,finishedTask,counter)
+                    [currentTask, finishedTask,algorithmSteps] = this.util.processFinishedTask(currentTask,finishedTask,counter,algorithmSteps)
                 }
                     
             }
             else{
+                algorithmSteps += `@^-`
                 gantString += "-"
             }
             counter += 1;
+            algorithmSteps += `|`
         }
 
         const info = taskList.map( (item: Task): TaskInfo=> {
@@ -113,16 +116,17 @@ export class Algorithm{
                 at: item.arrivalTime,
                 cb: item.cpuBurst,
                 wt: item.waitingTime,
-                tt: item.turnaroundTime
+                tt: item.turnaroundTime,
             }
         }
         )
         
 
-        return [gantString, info]
+        return [gantString, info,algorithmSteps]
     }
 
     spf(taskList: Task[]){
+        let algorithmSteps = ""
         const n = "nonpreemptive"
         let counter = 0;
         let queue:Task[] = [];
@@ -134,7 +138,7 @@ export class Algorithm{
 
         while(finishedTask.length !== taskList.length){
             if (copyTaskList.length){
-                [queue, copyTaskList] = this.util.addToQueue(copyTaskList,counter,queue)
+                [queue, copyTaskList,algorithmSteps] = this.util.addToQueue(copyTaskList,counter,queue,algorithmSteps)
             }
 
             if (queue.length > 0){
@@ -143,20 +147,22 @@ export class Algorithm{
                     if (gantString[gantString.length - 1] === "-"){
                         gantString += "|"
                     }
-                    currentTask = this.util.taskExecute(queue.shift(),counter,n)
+                    [currentTask,algorithmSteps] = this.util.taskExecute(queue.shift(),counter,n,algorithmSteps)
                 }
             }
 
             if (currentTask){
+                algorithmSteps += `${currentTask.id}^-`
                 gantString += currentTask.id
                 currentTask.cpuBurstNeeded -= 1;
                 if (currentTask.cpuBurstNeeded === 0){
                     gantString += "|";
-                    [currentTask, finishedTask] = this.util.processFinishedTask(currentTask,finishedTask,counter)
+                    [currentTask, finishedTask,algorithmSteps] = this.util.processFinishedTask(currentTask,finishedTask,counter,algorithmSteps)
                 }
 
             }
             else{
+                algorithmSteps += "@^-"
                 gantString += "-"
             }
             counter += 1;
@@ -176,6 +182,7 @@ export class Algorithm{
     }
 
     srtf(taskList: Task[]){
+        let algorithmSteps = ""
         const n = "preemptive"
         let counter = 0;
         let queue:Task[] = [];
@@ -187,7 +194,7 @@ export class Algorithm{
 
         while(finishedTask.length !== taskList.length ){
             if (copyTaskList.length){
-                [queue, copyTaskList] = this.util.addToQueue(copyTaskList,counter,queue)
+                [queue, copyTaskList,algorithmSteps] = this.util.addToQueue(copyTaskList,counter,queue,algorithmSteps)
             }
 
             if (queue.length > 0){
@@ -199,29 +206,32 @@ export class Algorithm{
                     }
                     if(currentTask){
                         //if there is a task currently executing then shift current task
+                        algorithmSteps += `${currentTask.id}<*-${currentTask.id}>~-`
                         currentTask.shift.push(counter);
                         queue.push(currentTask);
                         gantString += "|"
                     }
-                    currentTask = this.util.taskExecute(queue.shift() as Task,counter,n)
+                    [currentTask,algorithmSteps] = this.util.taskExecute(queue.shift() as Task,counter,n,algorithmSteps)
 
                 }
                     
             }
 
             if (currentTask){
+                algorithmSteps += `${currentTask.id}^-`
                 gantString += currentTask.id
                 currentTask.cpuBurstNeeded -= 1;
                 if (currentTask.cpuBurstNeeded === 0){
                     gantString += "|";
-                    [currentTask, finishedTask] = this.util.processFinishedTask(currentTask,finishedTask,counter)
+                    [currentTask, finishedTask,algorithmSteps] = this.util.processFinishedTask(currentTask,finishedTask,counter,algorithmSteps)
                 }
                    
             }
             else{
+                algorithmSteps += "@^-"
                 gantString += "-"
             }
-
+            algorithmSteps += "|"
             counter += 1;
 
         }
@@ -235,10 +245,11 @@ export class Algorithm{
             }
         }
         )
-        return [gantString, info]
+        return [gantString, info, algorithmSteps]
     }
 
     rr(taskList: Task[],timeSlice: number){
+        let algorithmSteps = ""
         console.log(timeSlice)
         let bol = false
         let currentSlice = timeSlice
@@ -254,31 +265,33 @@ export class Algorithm{
 
         while(finishedTask.length !== taskList.length ){
             if (copyTaskList.length){
-                [queue, copyTaskList] = this.util.addToQueue(copyTaskList,counter,queue)
+                [queue, copyTaskList,algorithmSteps] = this.util.addToQueue(copyTaskList,counter,queue,algorithmSteps)
             }
 
             if (queue.length > 0){
                 if(!currentTask){
                     if(gantString[gantString.length-1] === "-")
-                        gantString += "|"
-                    currentTask = this.util.taskExecute(queue.shift(),counter,n)
+                        gantString += "|";
+                    [currentTask,algorithmSteps] = this.util.taskExecute(queue.shift(),counter,n,algorithmSteps)
                     revertSlice()
                 }    
             }
             if(currentSlice === 0){
-                bol = true
-                console.log(counter);
-                [queue, copyTaskList] = this.util.addToQueue(copyTaskList, counter, queue);
+                bol = true;
+                
+                [queue, copyTaskList,algorithmSteps] = this.util.addToQueue(copyTaskList, counter, queue,algorithmSteps);
                 gantString += "|";
-                [currentTask,queue] = this.util.onSliceEnd(currentTask,counter,queue)
+                [currentTask,queue,algorithmSteps] = this.util.onSliceEnd(currentTask,counter,queue,algorithmSteps)
+                algorithmSteps += "|"
                 revertSlice()
             }
             else  if (currentTask){
+                algorithmSteps += `${currentTask.id}^-`
                 gantString += currentTask.id
                 currentTask.cpuBurstNeeded -= 1;
                 currentSlice -= 1;
                 if (currentTask.cpuBurstNeeded === 0){
-                    [currentTask, finishedTask] = this.util.processFinishedTask(currentTask,finishedTask,counter)
+                    [currentTask, finishedTask,algorithmSteps] = this.util.processFinishedTask(currentTask,finishedTask,counter,algorithmSteps)
                     gantString += "|";
                     revertSlice()
                 }
@@ -286,8 +299,10 @@ export class Algorithm{
             else{
                 gantString += "-"
             }
-            if (bol == false)
+            if (bol == false){
                 counter += 1;
+                algorithmSteps += "|"
+            }
 
             bol = false
         }
@@ -306,6 +321,7 @@ export class Algorithm{
     }
 
     psnp(taskList: Task[]){
+        let algorithmSteps = ""
         const n = "nonpreemptive"
         let counter = 0;
         let queue:Task[] = [];
@@ -317,7 +333,7 @@ export class Algorithm{
 
         while(finishedTask.length !== taskList.length){
             if (copyTaskList.length){
-                [queue, copyTaskList] = this.util.addToQueue(copyTaskList,counter,queue)
+                [queue, copyTaskList,algorithmSteps] = this.util.addToQueue(copyTaskList,counter,queue,algorithmSteps)
             }
 
             if (queue.length > 0){
@@ -327,24 +343,27 @@ export class Algorithm{
                     if (gantString[gantString.length - 1] === "-"){
                         gantString += "|"
                     }
-                    currentTask = this.util.taskExecute(queue.shift(),counter,n)
+                    [currentTask,algorithmSteps] = this.util.taskExecute(queue.shift(),counter,n,algorithmSteps)
                 }
                     
             }
 
             if (currentTask){
+                algorithmSteps += `${currentTask.id}^-`
                 gantString += currentTask.id
                 currentTask.cpuBurstNeeded -= 1;
                 if (currentTask.cpuBurstNeeded === 0){
-                        [currentTask, finishedTask] = this.util.processFinishedTask(currentTask,finishedTask,counter)
+                        [currentTask, finishedTask,algorithmSteps] = this.util.processFinishedTask(currentTask,finishedTask,counter,algorithmSteps)
                         gantString += "|"
                     
                 }
                     
             }
             else{
+                algorithmSteps += "@^-"
                 gantString += "-"
             }
+            algorithmSteps += "|"
             counter += 1;
         }
         
@@ -363,6 +382,7 @@ export class Algorithm{
     }
     
     psp(taskList: Task[]){
+        let algorithmSteps = ""
         const n = "preemptive"
         let counter = 0;
         let queue:Task[] = [];
@@ -374,7 +394,7 @@ export class Algorithm{
 
         while(finishedTask.length !== taskList.length ){
             if (copyTaskList.length){
-                [queue, copyTaskList] = this.util.addToQueue(copyTaskList,counter,queue)
+                [queue, copyTaskList,algorithmSteps] = this.util.addToQueue(copyTaskList,counter,queue,algorithmSteps)
             }
 
             if (queue.length > 0){
@@ -386,11 +406,12 @@ export class Algorithm{
                     }
                     if(currentTask){
                         //if there is a task currently executing then shift current task
+                        algorithmSteps += `${currentTask.id}<*-${currentTask.id}>~-`
                         currentTask.shift.push(counter);
                         gantString += "|"
                         queue.push(currentTask);
                     }
-                    currentTask = this.util.taskExecute(queue.shift() as Task,counter,n)
+                    [currentTask,algorithmSteps] = this.util.taskExecute(queue.shift() as Task,counter,n,algorithmSteps)
 
                 }
                     
@@ -401,15 +422,18 @@ export class Algorithm{
                 currentTask.cpuBurstNeeded -= 1;
                 if (currentTask.cpuBurstNeeded === 0){
                     gantString += "|";
-                    [currentTask, finishedTask] = this.util.processFinishedTask(currentTask,finishedTask,counter)
+                    [currentTask, finishedTask,algorithmSteps] = this.util.processFinishedTask(currentTask,finishedTask,counter,algorithmSteps)
                 }
                    
             }
             else{
+                algorithmSteps += "@^-"
                 gantString += "-"
             }
 
+
             counter += 1;
+            algorithmSteps += "|"
 
         }
         const info = taskList.map( (item: Task): TaskInfo=> {
