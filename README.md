@@ -1,4 +1,4 @@
-# test2
+# CPU Scheduling Simulator
 
 ## Project setup
 ```
